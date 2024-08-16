@@ -10,6 +10,7 @@ func GetDivisionById(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.NewError(fiber.StatusOK, "Welcome single division id call"))
 }
+
 func GetDivisionByName(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.NewError(fiber.StatusOK, "Welcome single division name call"))
