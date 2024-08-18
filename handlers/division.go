@@ -1,19 +1,62 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"errors"
+	"info-bd-api/database"
+	"info-bd-api/model"
+
+	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
+)
 
 func GetAllDivision(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Welcome all division"))
-}
-func GetDivisionById(c *fiber.Ctx) error {
+	var div []model.Division
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Welcome single division id call"))
+	res := database.DB.Find(&div)
+
+	if res.Error != nil {
+		return c.JSON(fiber.NewError(fiber.StatusInternalServerError, "Failed to fetch divisions"))
+	}
+
+	return c.JSON(div)
+}
+
+func GetDivisionById(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	var division model.Division
+
+	if err := database.DB.First(&division, id).Error; err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Division not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch division",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(division)
 }
 
 func GetDivisionByName(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Welcome single division name call"))
+	name := c.Params("name")
+	var div model.Division
+	if err := database.DB.Where("name = ?", name).First(&div).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Division not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch division",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(div)
 }
 
 func AddDivision(c *fiber.Ctx) error {

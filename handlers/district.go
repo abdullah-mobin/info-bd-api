@@ -1,25 +1,96 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"errors"
+	"info-bd-api/database"
+	"info-bd-api/model"
+
+	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
+)
 
 func GetAllDistrict(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Welcome district"))
+	var dis []model.District
+
+	res := database.DB.Find(&dis)
+
+	if res.Error != nil {
+		return c.JSON(fiber.NewError(fiber.StatusInternalServerError, "Failed to fetch districts"))
+	}
+
+	return c.JSON(dis)
 }
 
-func GetAllDistrictByDivision(c *fiber.Ctx) error {
+func GetAllDistrictByDivisionId(c *fiber.Ctx) error {
+	divisionID := c.Params("division_id")
+	var division model.Division
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "searching districts by division"))
+	if err := database.DB.Preload("Districts").First(&division, "id = ?", divisionID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Division not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch division",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(division)
 }
 
-func GetAllDistrictById(c *fiber.Ctx) error {
+func GetAllDistrictByDivisionName(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "searching districts by id"))
+	name := c.Params("division_name")
+	var div model.Division
+	if err := database.DB.Preload("Districts").Where("name = ?", name).First(&div).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Division not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch division",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(div)
 }
 
-func GetAllDistrictByName(c *fiber.Ctx) error {
+func GetDistrictById(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "searching districts by name"))
+	id := c.Params("id")
+	var district model.District
+
+	if err := database.DB.First(&district, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"erros": "District not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Internal server error",
+		})
+	}
+
+	return c.JSON(district)
+}
+
+func GetDistrictByName(c *fiber.Ctx) error {
+
+	name := c.Params("name")
+	var district model.District
+	if err := database.DB.Where("name = ?", name).First(&district).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "district not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch district",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(district)
 }
 
 func AddDistrict(c *fiber.Ctx) error {
