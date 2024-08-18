@@ -34,7 +34,8 @@ func SetDistrictRoutes(router fiber.Router) {
 	dis := router.Group("/dis")
 
 	dis.Get("/get-all-district", handlers.GetAllDistrict).Name("get-all-district")
-	dis.Get("/get-all-district/division/:division", handlers.GetAllDistrictByDivision).Name("get-all-district-by-division")
+	dis.Get("/get-all-district/division-name/:division_name", handlers.GetAllDistrictByDivisionName).Name("get-all-district-by-division-name")
+	dis.Get("/get-all-district/division-id/:division_id", handlers.GetAllDistrictByDivisionId).Name("get-all-district-by-division-id")
 	dis.Get("/get-district/id/:id", handlers.GetDistrictById).Name("get-district-by-id")
 	dis.Get("/get-district/name/:name", handlers.GetDistrictByName).Name("get-district-by-name")
 
