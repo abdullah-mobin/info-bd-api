@@ -8,9 +8,9 @@ type Division struct {
 }
 
 type District struct {
-	Id         int      `json:"id,omitempty" gorm:"primaryKey"`
-	Name       string   `json:"name,omitempty"`
-	DivisionID int      `json:"division_id,omitempty"`
-	Area       float32  `json:"area,omitempty"`
-	Division   Division `json:"division,omitempty" gorm:"foreignKey:DivisionID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Id         int     `json:"id,omitempty" gorm:"primaryKey"`
+	Name       string  `json:"name,omitempty"`
+	DivisionID int     `json:"division_id,omitempty"`
+	Area       float32 `json:"area,omitempty"`
+	// Division   Division `json:"division,omitempty" gorm:"foreignKey:DivisionID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
