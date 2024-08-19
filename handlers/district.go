@@ -95,6 +95,18 @@ func GetDistrictByName(c *fiber.Ctx) error {
 
 func AddDistrict(c *fiber.Ctx) error {
 
+	var district model.District
+	if err := c.BodyParser(&district); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "failed to parse request",
+		})
+	}
+	if err := database.DB.Create(&district).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to save data",
+		})
+	}
+
 	return c.JSON(fiber.NewError(fiber.StatusOK, "district added"))
 }
 

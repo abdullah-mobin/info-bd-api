@@ -61,7 +61,19 @@ func GetDivisionByName(c *fiber.Ctx) error {
 
 func AddDivision(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "district added"))
+	var division model.Division
+	if err := c.BodyParser(&division); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "failed to parse request",
+		})
+	}
+	if err := database.DB.Create(&division).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to save data",
+		})
+	}
+
+	return c.JSON(fiber.NewError(fiber.StatusCreated, "division added"))
 }
 
 func UpdateDivisionById(c *fiber.Ctx) error {
