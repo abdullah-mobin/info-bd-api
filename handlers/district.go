@@ -111,12 +111,62 @@ func AddDistrict(c *fiber.Ctx) error {
 }
 
 func UpdateDistrictByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	var district model.District
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Update District By Name"))
+	if err := database.DB.Where("name = ?", name).First(&district).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "district not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve district",
+		})
+	}
+
+	if err := c.BodyParser(&district); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to parse request body",
+		})
+	}
+
+	if err := database.DB.Save(&district).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update district",
+		})
+	}
+
+	return c.JSON(fiber.NewError(fiber.StatusOK, "district updated"))
 }
 func UpdateDistrictById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var district model.District
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Update District By id"))
+	if err := database.DB.First(&district, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "district not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve district",
+		})
+	}
+
+	if err := c.BodyParser(&district); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to parse request body",
+		})
+	}
+
+	if err := database.DB.Save(&district).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update district",
+		})
+	}
+
+	return c.JSON(fiber.NewError(fiber.StatusOK, "district updated"))
 }
 
 func DeleteDistrictById(c *fiber.Ctx) error {

@@ -77,12 +77,63 @@ func AddDivision(c *fiber.Ctx) error {
 }
 
 func UpdateDivisionById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var division model.Division
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Update Division By id"))
+	if err := database.DB.First(&division, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Division not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve division",
+		})
+	}
+
+	if err := c.BodyParser(&division); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to parse request body",
+		})
+	}
+
+	if err := database.DB.Save(&division).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update division",
+		})
+	}
+
+	return c.JSON(fiber.NewError(fiber.StatusOK, "division updated"))
 }
-func UpdateDivisionByName(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Update Division By Name"))
+func UpdateDivisionByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	var division model.District
+
+	if err := database.DB.Where("name = ?", name).First(&division).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "division not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve division",
+		})
+	}
+
+	if err := c.BodyParser(&division); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to parse request body",
+		})
+	}
+
+	if err := database.DB.Save(&division).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update division",
+		})
+	}
+
+	return c.JSON(fiber.NewError(fiber.StatusOK, "division updated"))
 }
 func DeleteDivisionByName(c *fiber.Ctx) error {
 
