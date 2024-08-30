@@ -171,13 +171,38 @@ func UpdateDistrictById(c *fiber.Ctx) error {
 
 func DeleteDistrictById(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "delete districts by id"))
+	id := c.Params("id")
+	if err := database.DB.Delete(&model.District{}, id).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete district",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "District deleted successfully",
+	})
 }
+
 func DeleteDistrictByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	var dis model.District
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "delete districts by name"))
-}
-func DeleteAllDistrictByDivision(c *fiber.Ctx) error {
+	if err := database.DB.Where("name = ?", name).First(&dis).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "District not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to find District",
+		})
+	}
+	if err := database.DB.Delete(&dis).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete District",
+		})
+	}
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "delete all districts by division"))
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "District deleted successfully",
+	})
 }

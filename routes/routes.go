@@ -46,5 +46,4 @@ func SetDistrictRoutes(router fiber.Router) {
 
 	dis.Delete("/delete-district/id/:id", handlers.DeleteDistrictById).Name("delete-district-by-id")
 	dis.Delete("/delete-district/name/:name", handlers.DeleteDistrictByName).Name("delete-district-by-name")
-	dis.Delete("/delete-all-district/division/:division", handlers.DeleteAllDistrictByDivision).Name("delete-district-by-division")
 }

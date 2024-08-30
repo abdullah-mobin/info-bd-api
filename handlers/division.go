@@ -135,11 +135,40 @@ func UpdateDivisionByName(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.NewError(fiber.StatusOK, "division updated"))
 }
-func DeleteDivisionByName(c *fiber.Ctx) error {
-
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Delete Division By Name"))
-}
 func DeleteDivisionById(c *fiber.Ctx) error {
 
-	return c.JSON(fiber.NewError(fiber.StatusOK, "Delete Division By id"))
+	id := c.Params("id")
+	if err := database.DB.Delete(&model.Division{}, id).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete division",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Division deleted successfully",
+	})
+}
+func DeleteDivisionByName(c *fiber.Ctx) error {
+	name := c.Params("name")
+	var div model.Division
+
+	if err := database.DB.Where("name = ?", name).First(&div).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Division not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to find division",
+		})
+	}
+	if err := database.DB.Delete(&div).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete division",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Division deleted successfully",
+	})
 }
